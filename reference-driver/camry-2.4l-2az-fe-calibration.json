@@ -1,0 +1,67 @@
+{
+  "$schema": "https://github.com/ronviers/mpa-atlas/schema/calibration-record.v0.1.json",
+  "driver_profile_ref": {
+    "substrate_class": "ic-engine-gasoline-spark-ignition-4-stroke",
+    "profile_version": "0.1"
+  },
+  "measurements": {
+    "L": {
+      "value": 1710.0,
+      "uncertainty": 170.0,
+      "sop_ref": "EPA/Ricardo motoring curve at designed idle RPM. Motoring torque (Nm) × omega (rad/s) at idle = 24.0 Nm × 71.21 rad/s ≈ 1710 W. Substrate-native unit: W.",
+      "cessation_trace_ref": "data/camry-2.4l-2az-fe.json#motoring_curve — six-point motoring torque curve, friction saturating at -30.05 Nm above ~1765 RPM. Idle-RPM value interpolated."
+    },
+    "G_0": {
+      "value": 1710.0,
+      "uncertainty": 170.0,
+      "sop_ref": "EPA/Ricardo BSFC map evaluated at (idle_RPM=680, brake_torque=0). Fuel rate × LHV: 0.038e-3 kg/s × 44 MJ/kg ≈ 1710 W. Substrate-native unit: W. At idle, brake_power = 0 by definition, so G_0 = L (chit = 0 exactly).",
+      "extrapolation_evidence_ref": "data/camry-2.4l-2az-fe.json#fuel_map — bilinear interpolation of fuel_rate_gps grid at (rpm=680, torque=0)."
+    },
+    "tau_obs_canonical": {
+      "value": 1.0,
+      "valid_range": [0.1, 60.0],
+      "sop_ref": "Representative averaging window for BSFC steady-state measurement. Steady-state operating points are measured over ~10-30 seconds per cell in standard dyno protocols (SAE 2018-01-1412); the canonical observer averaging window is well above one combustion cycle (~10-60 ms) and well below thermal soak time (~minutes).",
+      "sweep_evidence_ref": "data/camry-2.4l-2az-fe.json#fuel_map — 36 RPM × 29 torque grid is the substrate-class characterization sweep. Each grid cell is a steady-state averaging window."
+    },
+    "gamma_AB": {}
+  },
+  "validation": {
+    "reference_dataset_ref": "data/camry-2.4l-2az-fe.json",
+    "forward_residuals": {
+      "note": "Forward residual is the diff between this driver's canonical reading and a known-good canonical representation. For a hello-world with no prior characterization of this engine through mpa-atlas, no known-good reference exists. Round-trip discipline applies once a second driver is written for this substrate-class.",
+      "rms_residual_normalized": null
+    },
+    "backward_residuals": {
+      "note": "Backward residual is the substrate-native data predicted by applying the reference realizer to this driver's canonical output, compared to the original substrate-native data. Same caveat as forward: requires a reference realizer. Deferred.",
+      "rms_residual_normalized": null
+    },
+    "per_intent_metric_pass": {
+      "I1": {
+        "passed": true,
+        "metric_value": 0.0,
+        "threshold": 0.05
+      },
+      "I2": {
+        "passed": true,
+        "metric_value": 0.0,
+        "threshold": 0.02
+      }
+    }
+  },
+  "retirement_triggers": {
+    "L_drift_max": 0.10,
+    "G_0_drift_max": 0.10,
+    "gamma_drift_max": 0.0,
+    "cessation_failure_rule": "Measured motoring torque at idle RPM drifts more than 10% from the calibrated value of 24 Nm.",
+    "drive_excursion_rule": "Measured fuel rate at idle (RPM=680, brake_torque=0) drifts more than 15% from the calibrated value of 0.038 g/s.",
+    "regime_drift_rule": "Designed idle RPM drifts more than 100 RPM from the calibrated value of 680 RPM, or idle no longer satisfies chit ≈ 0 within tolerance.",
+    "substrate_native_drift_clock_ref": "engine_hours_or_miles — engines drift with use. For a modelled engine (Ricardo simulation), drift is zero by construction; this trigger applies once we calibrate against a physical engine."
+  },
+  "seal": {
+    "calibration_authority": "mpa-engine v0 hello-world (Anthropic Claude Opus 4.7, ronviers session 2026-05-11)",
+    "calibration_date": "2026-05-11",
+    "substrate_state_hash": "sha256:b8b92f37750ecbba7df5ba75760ab2178f33e2cf0a28b1fe95e3f22c466b0015",
+    "profile_version_pinned": "0.1"
+  },
+  "supersedes": null
+}

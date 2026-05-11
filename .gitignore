@@ -15,9 +15,10 @@ env/
 build/
 dist/
 
-# Results / generated data
-docs/results/
+# Generated tmp files
 *.tmp
+
+# (docs/results/ IS tracked — Camry smoke + plots are committed)
 
 # OS
 .DS_Store

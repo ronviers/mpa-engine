@@ -1,0 +1,110 @@
+{
+  "engine": "Ricardo Std Car (2007 Toyota Camry 2.4L)",
+  "run_at": "2026-05-11T20:22:46.997549Z",
+  "readings": [
+    {
+      "label": "idle (680 RPM, 0 Nm)",
+      "rpm": 680.0,
+      "brake_torque_nm": 0.0,
+      "g0_w": 8654.28344,
+      "l_w": 8654.28344,
+      "brake_power_w": 0.0,
+      "chit": 0.0,
+      "regime": "s",
+      "notes": null
+    },
+    {
+      "label": "low-load cruise (2000 RPM, 50 Nm)",
+      "rpm": 2000.0,
+      "brake_torque_nm": 50.0,
+      "g0_w": 39886.05808,
+      "l_w": 29414.082568034028,
+      "brake_power_w": 10471.975511965977,
+      "chit": 0.30455328270599785,
+      "regime": "c",
+      "notes": null
+    },
+    {
+      "label": "mid-load cruise (2500 RPM, 100 Nm)",
+      "rpm": 2500.0,
+      "brake_torque_nm": 100.0,
+      "g0_w": 80869.5932,
+      "l_w": 54689.65442008506,
+      "brake_power_w": 26179.938779914944,
+      "chit": 0.3911633383475498,
+      "regime": "c",
+      "notes": null
+    },
+    {
+      "label": "BSFC sweet spot (~3000 RPM, ~200 Nm)",
+      "rpm": 3000.0,
+      "brake_torque_nm": 200.0,
+      "g0_w": 186796.40759999998,
+      "l_w": 123964.55452820411,
+      "brake_power_w": 62831.853071795864,
+      "chit": 0.410023620183462,
+      "regime": "c",
+      "notes": null
+    },
+    {
+      "label": "peak torque (4000 RPM, 218 Nm)",
+      "rpm": 4000.0,
+      "brake_torque_nm": 218.0,
+      "g0_w": 275678.7088,
+      "l_w": 184363.0823356567,
+      "brake_power_w": 91315.62646434331,
+      "chit": 0.4023290022519567,
+      "regime": "c",
+      "notes": null
+    },
+    {
+      "label": "high-RPM low load (5000 RPM, 50 Nm)",
+      "rpm": 5000.0,
+      "brake_torque_nm": 50.0,
+      "g0_w": 121761.12520000001,
+      "l_w": 95581.18642008507,
+      "brake_power_w": 26179.938779914944,
+      "chit": 0.24208512927902923,
+      "regime": "c",
+      "notes": null
+    },
+    {
+      "label": "high-RPM mid load (5000 RPM, 150 Nm)",
+      "rpm": 5000.0,
+      "brake_torque_nm": 150.0,
+      "g0_w": 256903.0068,
+      "l_w": 178363.1904602552,
+      "brake_power_w": 78539.81633974482,
+      "chit": 0.3648767408565647,
+      "regime": "c",
+      "notes": null
+    },
+    {
+      "label": "redline-region (6000 RPM, 178 Nm)",
+      "rpm": 6000.0,
+      "brake_torque_nm": 178.0,
+      "g0_w": 439591.13616000005,
+      "l_w": 327750.43769220344,
+      "brake_power_w": 111840.69846779664,
+      "chit": 0.29359260081665284,
+      "regime": "c",
+      "notes": null
+    }
+  ],
+  "predictions": {
+    "soc_attractor": {
+      "claim": "chit at idle = 0 (cdv1 SOC-attractor instance)",
+      "predicted": 0.0,
+      "observed": 0.0,
+      "passed": true
+    },
+    "chit_max": {
+      "claim": "chit_max \u2248 -ln(1 - \u03b7_thermal_max) at BSFC sweet spot",
+      "predicted": 0.43232256227804705,
+      "observed": 0.410023620183462,
+      "eta_max_published": 0.351,
+      "delta": 0.02229894209458505,
+      "passed": true
+    }
+  }
+}
