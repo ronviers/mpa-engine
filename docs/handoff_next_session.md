@@ -1,59 +1,70 @@
 # Handoff — next session
 
-## Current state (2026-05-11, v0 scaffold)
+## Current state (2026-05-11, v0 scaffold + research landed)
 
-**Scaffolding landed.** Repo structure follows `mpa-brain` pattern (README, CLAUDE.md, docs/, experiments/, mpa_engine_packs/, data/, reference-driver/). Protocol-shaped artifacts (`reference-driver/*.md`, calibration record JSON) carry the thin-RFC discipline; everything else is normal engineering.
+**Scaffolding landed (commit 9ea2adc).** Repo structure matches `mpa-brain` pattern. Protocol-shaped artifacts carry mpa-atlas thin-RFC discipline; everything else is normal engineering.
 
 **Substrate identified.** Internal-combustion engines characterized at the dynamometer. cdv1 reads:
 
 - Coherence: sustained crankshaft rotation under load.
 - G₀: combustion energy delivery rate (fuel mass flow × LHV at the operating point).
 - L: friction + pumping + thermal losses. Measured directly via motoring curve when available.
-- chit = ln(G₀/L). At idle, brake_power = 0 by definition → G₀ = L → **chit = 0 exactly**. This is the cdv1 SOC-attractor prediction confirmed at one engine; cross-engine fingerprint is the sharper test.
+- chit = ln(G₀/L). At idle, brake_power = 0 → G₀ = L → **chit = 0 exactly**.
 
-**Reference data secured.** EPA's Ricardo Baseline Standard Car Engine (2007-era Toyota Camry 2.4L 2AZ-FE):
+**Camry 2.4L 2AZ-FE data secured.** EPA Ricardo simulation; full BSFC map, WOT curve, motoring curve, idle. See `data/sources/SOURCES.md` §1.
 
-- Full BSFC map: 36 RPM × 29 torque grid (1044 (RPM, torque, fuel_rate) entries), 0–7000 RPM × −50 to +230 Nm
-- WOT curve: 9 points, peak torque 218.25 Nm at 3999 RPM
-- Motoring curve: 6 points, friction saturates at −30.05 Nm above ~1765 RPM
-- Designed idle: 680 RPM
-- Fuel: LHV 44 MJ/kg, density 0.738 kg/L
-- Peak efficiency: BSFC 233 g/kWh (≈35% thermal efficiency) at ~3000 RPM, ~200 Nm
-- Provenance: [EPA / Ricardo, 2016-06-20 PDF](https://19january2021snapshot.epa.gov/regulations-emissions-vehicles-and-engines/process-generating-engine-fuel-consumption-map-ricardo-0_.html)
-
-## What's in this commit
-
-- Repo scaffold (README, CLAUDE.md, .gitignore, docs/, experiments/, mpa_engine_packs/, data/, reference-driver/)
-- This handoff document
-- Empty FOOTING.md (substrate-conditional findings log, append-only)
-- Empty mpa_engine_packs/ stub
-- Driver profile stub (reference-driver/ic-engine-dyno.md) at thin-RFC weight — enough to declare substrate-class and gamut, deferring measurement-protocol detail to follow-on commits
+**Priority 2/3/Adjacent research landed (2026-05-11).** Source pointers organized in `data/sources/SOURCES.md` §2–§5:
+- §2: Six candidate additional engines (Mazda Skyactiv 2.0L NA-DI, Honda L15B7 1.5L turbo, Ricardo EGR-Boost DI, Brunel Hydra single-cylinder, plus EPA methodology paper and PMC random-forest BSFC datasets).
+- §3: ~10–15 cross-engine idle RPMs across carb-era service manuals + ECU-era HPTuners + PennDOT regulatory bounds + VehiclePhysics structural confirmation.
+- §4: Open-access transient literature (EPA SAE 2017-01-0533 covers DFCO; DTIC Bodie maneuvers; theses). Prime SAE papers (850967, 770046) paywalled, deferred.
+- §5: **Two substantive cdv1 touchpoints in adjacent literature** — Lambert W self-excited limit cycle at idle (UMich DeepBlue), and Atlantis Press review framing idle as "nonlinear, time-varying, uncertain dynamics." Both pre-date cdv1; engineering literature has been reaching for what cdv1 names.
 
 ## What's queued
 
 In recommended order:
 
-1. **Extract Camry data to JSON.** Transcribe the EPA PDF tables (WOT, motoring, BSFC map, idle, engine spec) into `data/camry-2.4l-2az-fe.json`. Source PDF cached at `data/sources/`. Single self-contained file so future readers can re-derive without re-pulling the EPA PDF.
-2. **Implement `mpa_engine_packs.engine_data`.** Loaders + interpolation for BSFC map, WOT curve, motoring curve. Honest about the BSFC map's interpolation behaviour at the boundaries (some operating points report fuel_rate = 0 in the EPA data; the cdv1 reading needs to handle these as out-of-gamut or vacuous).
-3. **Implement `mpa_engine_packs.chit_profile`.** chit(RPM, brake_torque) = ln(G₀ / (G₀ − brake_power)), with G₀ = fuel_rate × LHV. Return chit + regime classification per cdv1.
-4. **Worked calibration record.** `reference-driver/camry-2.4l-2az-fe-calibration.json` conforming to [calibration-record.v0.1.json schema](https://github.com/ronviers/mpa-atlas/blob/main/schema/calibration-record.v0.1.json). Provenance: SOP refs point at the EPA PDF; cessation-trace ref points at the motoring curve.
-5. **Smoke experiment.** `experiments/chit_camry.py` computes chit at idle, at peak power, at peak efficiency, at WOT low/mid/high. Writes JSON to `docs/results/`. Verifies the SOC-attractor prediction (chit ≈ 0 at idle, narrow chit range across envelope).
-6. **Cross-engine fingerprint** (after outside-models Priority 2 lands). Idle RPMs and stall thresholds across 20–40 engines, carb vs ECU split. Test cdv1's "idle just above stall" prediction across engine classes. Add per-engine calibration records under `reference-driver/`.
-7. **CK-aging in return-to-idle** (after outside-models Priority 3 lands, if data surfaces). Time-series transient data for one or more well-tuned engines. Predict slower-than-exponential decay tail at long times (cdv1 §Stability s-regime algebraic settling).
+### Phase A: Camry first end-to-end (no external research needed beyond Priority 1 already in hand)
 
-## Gotchas surfaced from the EPA PDF
+1. **Extract Camry data to JSON.** Transcribe EPA PDF tables into `data/camry-2.4l-2az-fe.json`. Single self-contained file. Schema: `{engine: {...spec...}, wot_curve: [{rpm, torque_nm}, ...], motoring_curve: [{rpm, torque_nm}, ...], bsfc_map: {rpm_grid, torque_grid, fuel_rate_gps_grid}, idle: {rpm}, fuel: {lhv_mjpkg, density_kgpl, ...}}`.
+2. **Implement `mpa_engine_packs.engine_data`.** Loaders + interpolation. Honest gamut handling: BSFC values at (RPM=0, any) and at brake_torque < 0 are out-of-gamut for cdv1's driving register.
+3. **Implement `mpa_engine_packs.chit_profile`.** `chit(rpm, brake_torque) = ln(G_0 / (G_0 - brake_power))` with `G_0 = fuel_rate(rpm, brake_torque) * LHV`. Return chit + regime classification.
+4. **Camry calibration record.** `reference-driver/camry-2.4l-2az-fe-calibration.json` conforming to [calibration-record.v0.1.json](https://github.com/ronviers/mpa-atlas/blob/main/schema/calibration-record.v0.1.json). SOP refs point at the EPA PDF; cessation-trace ref at the motoring curve.
+5. **Smoke experiment.** `experiments/chit_camry.py` computes chit at idle, peak power, peak efficiency, several WOT points. Writes JSON to `docs/results/`. Verifies SOC-attractor: chit ≈ 0 at idle, narrow chit range (~[0, 0.5]) across envelope.
+6. **First FOOTING entry.** F-001: "Engine chit range bounded by thermal efficiency" — chit_max ≈ −ln(1 − η_thermal,max). Substrate-class universality conjecture for the cross-engine fingerprint to test.
 
-- The BSFC map covers torque values down to −50 Nm (motoring region) — these are NOT brake operating points but the simulated motoring response. Treat as substrate-conditional: at brake_torque < 0, the engine is being driven by the dyno, not by combustion. The chit reading on this region is the *driven* register, distinct from the *driving* register that cdv1's c/s/r regimes are about.
-- BSFC = ∞ at zero brake power. The chit reading handles this naturally (G₀ = L, chit = 0), but BSFC-as-a-map has a singular line at brake_torque = 0 that must not be silently interpolated through.
-- Fuel rate at (0 RPM, any torque) is reported nonzero in the BSFC map — this is interpolation/boundary artefact, not physical. Out-of-gamut on the low-RPM side.
-- Designed idle (680 RPM) is below the lowest WOT data point (615 RPM). The engine's gamut on the upper torque envelope doesn't extend down to idle RPM. This is correct: at idle, brake torque is zero, well below the WOT curve.
+### Phase B: Cross-engine fingerprint (uses Priority 1 candidate engines + Priority 2 idle data)
+
+7. **Pull Mazda Skyactiv 2.0L data.** Repeat steps 1–4 for the Skyactiv. Calibration record + chit profile. **Expected difference from Camry:** higher peak thermal efficiency (~40% vs ~35%) → chit_max ~0.51 vs ~0.43. If FOOTING F-001 holds, this should be quantitative.
+8. **Pull Honda L15B7 turbo data.** Same. Turbocharged → broader operating envelope, possibly different chit-range fingerprint.
+9. **Idle-vs-stall fingerprint table.** Pull idle RPMs from §3 service manuals. Extract carb-vs-EFI split. For each engine where stall RPM is known or extractable, compute idle-RPM / stall-RPM ratio. **cdv1 prediction:** ratio clusters tighter (smaller, just-above-1) for ECU-controlled engines; broader for carbureted. PennDOT regulatory bound (1200/1600 RPM) sits well above the substrate-class typical idle — confirms regulatory envelope is set by stability margin not optimum efficiency.
+10. **FOOTING F-002:** the idle-vs-stall fingerprint result.
+
+### Phase C: Transient signature (CK-aging test) — uses Priority 3 + Adjacent
+
+11. **Pull EPA SAE 2017-01-0533.** Extract time-series fuel-flow data during DFCO and return-to-fuel events. Most directly relevant open data.
+12. **Pull UMich Lambert W thesis.** Read for the self-excited limit cycle model at idle. Compare its DDE structure to cdv1 §Stability's Wall-forces-NRT chain. Two outcomes: (a) the DDE Hopf bifurcation cdv1 predicts is recognizable in the Lambert W framework → strong cdv1 touchpoint; (b) the two formalisms describe distinct phenomena → weaker but still informative.
+13. **Pull Atlantis Press review.** Read for the "nonlinear, time-varying, uncertain dynamics" framing and any survey of published return-to-idle transient data.
+14. **Compute return-to-idle decay tail.** If §11 data permits, fit exponential vs power-law tail to RPM(t) after tip-out. cdv1 §Stability predicts algebraic settling at chit-zero (well-tuned engines); exponential elsewhere.
+15. **FOOTING F-003:** the transient signature result (or honest null finding if data is insufficient).
+
+### Phase D: Validate against mpa-atlas
+
+16. **Run `mpa-bridge validate` on each calibration record.** Surface any schema or RFC-S §5 round-trip failures.
+17. **Surface RFC-C invariant 6 question to mpa-atlas.** RFC-C §3 invariant 6 ("drive sweep through chit → 0 aligns regime transitions with chit-predicted threshold") is awkward for engines: chit-zero IS idle, not a separately-measurable threshold. Substrate-conditional reading of invariant 6 may be needed.
+
+## Gotchas surfaced
+
+- BSFC map covers torque values down to −50 Nm (motoring region) — these are *driven* operating points, distinct from *driving* points. Out-of-gamut for cdv1's c/s/r regime structure.
+- Fuel rate at (0 RPM, any torque) is reported nonzero in the BSFC map — interpolation/boundary artefact, not physical. Out-of-gamut on the low-RPM side.
+- BSFC = ∞ at zero brake power. chit reading handles this naturally (G₀ = L, chit = 0), but BSFC-as-a-map has a singular line at brake_torque = 0 that must not be silently interpolated through.
+- Modelled engines (Ricardo simulation: Camry, Ricardo-EGR) vs measured engines (Mazda Skyactiv, Honda L15B7): calibration records should declare which, and the cross-engine fingerprint should not pool the two without acknowledging the methodological boundary.
 
 ## Open RFC-C invariant question
 
-RFC-C §3 invariant 6 ("drive sweep through chit → 0 aligns regime transitions with chit-predicted threshold"): the engine's chit-zero crossing happens at idle, not at a separately-measurable threshold. Whether this counts as "drive sweep through chit → 0" or whether the engine substrate-class requires a substrate-conditional reading of invariant 6 is open. Worth surfacing back to mpa-atlas as a finding once the calibration record actually fails or passes this invariant in `mpa-bridge validate`.
+(Carried from v0.) RFC-C §3 invariant 6 ("drive sweep through chit → 0 aligns regime transitions with chit-predicted threshold") is awkward for engines because chit-zero IS idle, not a separately-measurable threshold. Worth surfacing back to mpa-atlas as a finding once `mpa-bridge validate` is actually run on the Camry calibration record.
 
 ## Coordinates
 
 - Upstream framework: [mpa-atlas/framework/cdv1_compressed.md](https://github.com/ronviers/mpa-atlas/blob/main/framework/cdv1_compressed.md)
-- Validator tool: [mpa-bridge](https://github.com/ronviers/mpa-bridge) — once calibration record is written, run `mpa-bridge validate` on it
+- Validator tool: [mpa-bridge](https://github.com/ronviers/mpa-bridge)
 - Sibling substrate repos: [mpa-brain](https://github.com/ronviers/mpa-brain), [mpc-glass](https://github.com/ronviers/mpc-glass)
