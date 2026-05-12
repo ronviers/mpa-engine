@@ -1,5 +1,17 @@
 # Handoff — next session
 
+## FROZEN — 2026-05-11
+
+This handoff is frozen. Cross-substrate damping-universality work has moved to [mpa-relaxation](https://github.com/ronviers/mpa-relaxation); the engine work below (Phase B Skyactiv cross-engine fingerprint, Phase C transient signature, Phase D mpa-atlas validation) is deferred indefinitely.
+
+**What stands:** F-001 confirmed (chit_max ≈ -ln(1 - η_thermal,max), observed +0.410 vs. predicted +0.432 on Camry 2.4L 2AZ-FE). F-002 provisional (idle as cdv1 SOC attractor; cross-engine evidence not pursued).
+
+**Why frozen:** The carb-tuning scenario that motivated F-003 maps onto loudspeakers more cleanly than onto engines — Q_ts is a one-number damping dial, CSD measurement archives are free and abundant, and modern ECU dashpot algorithms partly erase the natural physical decay structure F-003 was trying to detect. Loudspeakers don't have that engineered overlay. mpa-relaxation carries the cross-substrate test with engines cited (this repo) and loudspeakers as substrate zero.
+
+The original plan is preserved below as a record.
+
+---
+
 ## Current state (2026-05-11, v0 scaffold + research landed)
 
 **Scaffolding landed (commit 9ea2adc).** Repo structure matches `mpa-brain` pattern. Protocol-shaped artifacts carry mpa-atlas thin-RFC discipline; everything else is normal engineering.

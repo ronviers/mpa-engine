@@ -1,5 +1,15 @@
 # Discipline: implementation, not protocol
 
+## Repo status: frozen at v0 (2026-05-11)
+
+This repo is **frozen** as a cited substrate-class instance. F-001 (chit_max ≈ -ln(1 - η_thermal,max)) is confirmed on the Camry 2.4L 2AZ-FE: observed +0.410 vs. predicted +0.432, |Δ| = 0.022 under the 0.10 falsifier threshold. F-002 (idle as cdv1 SOC attractor) stands as provisional pending cross-engine evidence that we are no longer pursuing here.
+
+Cross-substrate damping-universality work has moved to [mpa-relaxation](https://github.com/ronviers/mpa-relaxation), where engines are substrate-one (cited from this repo) and loudspeakers are substrate-zero. Phase B (Skyactiv cross-engine fingerprint) and Phase C (return-to-idle transient signature) from the handoff are deferred indefinitely. The carb-tuning scenario that motivated F-003 lives more cleanly in the loudspeaker substrate (Q_ts as a one-number damping dial, with free CSD measurement archives), and is the load-bearing experiment in mpa-relaxation.
+
+This repo continues to serve as a confirmed F-001 data point for the cross-substrate universality argument. Its protocol artifacts (driver profile, calibration record) remain authoritative for the IC-engine substrate-class.
+
+---
+
 This repo is a **substrate characterization** under the mpa framework. It instances cdv1 ([mpa-atlas/framework/cdv1_compressed.md](https://github.com/ronviers/mpa-atlas/blob/main/framework/cdv1_compressed.md)) on a real substrate (internal-combustion engines, characterized at the dynamometer) using publicly-archived data.
 
 ## What thin-RFC discipline does and does not govern here
